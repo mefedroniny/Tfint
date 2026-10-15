@@ -1,0 +1,47 @@
+# TF International — Apache configuration
+Options -Indexes
+DirectoryIndex index.html index.php
+ErrorDocument 404 /404.html
+AddDefaultCharset UTF-8
+AddType font/woff2 .woff2
+AddType image/svg+xml .svg
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Force HTTPS and www (the host already does this; kept as a safeguard)
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} !^www\. [NC]
+  RewriteRule ^ https://www.tfint.cz%{REQUEST_URI} [R=301,L]
+
+  # Old website URLs -> matching section of the new one-page site
+  RewriteRule ^index\.php$ /cz/ [R=301,L]
+  RewriteRule ^cz/kontakt/?$ /cz/#kontakt [R=301,NE,L]
+  RewriteRule ^cz/produkty-a-sluzby(/.*)?$ /cz/#sluzby [R=301,NE,L]
+  RewriteRule ^en/contact/?$ /en/#kontakt [R=301,NE,L]
+  RewriteRule ^en/products-and-services(/.*)?$ /en/#sluzby [R=301,NE,L]
+  RewriteRule ^de/kontakt/?$ /de/#kontakt [R=301,NE,L]
+  RewriteRule ^de/produkte-und-dienstleistungen(/.*)?$ /de/#sluzby [R=301,NE,L]
+  RewriteRule ^images/logo-tfint\.svg$ /assets/logo-tfint.svg [R=301,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  <FilesMatch "\.(woff2|png|svg|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml application/xml text/plain
+</IfModule>
